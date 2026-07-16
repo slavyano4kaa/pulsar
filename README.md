@@ -76,7 +76,7 @@ The project consists of two main parts:
 
 - **Loader** — shows a draggable in-game window, validates the key format `PULSAR-XXXX-XXXX-XXXX`, performs HWID binding checks, and establishes a Diffie-Hellman handshake with the server.
 - **Server** — validates the license, checks session limits (anti-double-session), and returns XOR-encrypted Lua bytecode.
-- **FiOne VM** — a custom Lua 5.1 bytecode interpreter written in Luau that executes the main script in a sandboxed environment, making static analysis significantly harder.
+- **VM** — a custom Lua 5.1 bytecode interpreter written in Luau that executes the main script in a sandboxed environment, making static analysis significantly harder.
 
 ---
 
@@ -266,7 +266,7 @@ For purchasing details, visit **[slavya.space](https://slavya.space)**.
 | **Session Limit** | Running two sessions with the same key triggers a permanent key ban |
 | **DH Key Exchange** | Client and server negotiate a shared secret; all payloads are XOR-encrypted |
 | **Hex + XOR Transport** | Raw bytes are hex-encoded and XOR'd with the session key before transmission |
-| **FiOne VM** | Main script runs inside a custom bytecode interpreter — not raw Luau |
+| **VM** | Main script runs inside a custom bytecode interpreter — not raw Luau |
 | **Anti-Hook Checks** | Loader verifies that native functions (`string.byte`, `bit32.bxor`, etc.) are not hooked by the executor |
 | **Key Format Validation** | Strict regex: `PULSAR-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}` |
 
