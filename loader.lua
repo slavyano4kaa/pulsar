@@ -21,9 +21,11 @@
 
     SECURITY:
         - HWID-locking: one key per machine
-        - DH key exchange for encrypted session
-        - Server-side bytecode delivery via custom Lua VM
-        - Anti-hook checks on critical native functions
+        - Multi-layer encrypted session handshake
+        - Server-side bytecode delivery via sandboxed Lua VM
+        - Anti-tamper checks on the executor environment
+        - One-time session tokens to prevent replay attacks
+        - Session collision detection (anti-dual-session ban)
 
     LICENSE FORMAT:
         PULSAR-XXXX-XXXX-XXXX  (alphanumeric, case-insensitive)

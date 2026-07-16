@@ -53,17 +53,24 @@ The project consists of two main parts:
 ┌──────────────────────────────────────────────────────┐
 │                   USER (Roblox)                      │
 │                                                      │
-│   loader.lua  ──►  POST /pulsar/check.php            │
+│   loader.lua  ──►  HTTPS / POST                      │
 │       │               │                              │
 │   GUI input           ▼                              │
-│   (key + HWID)   DH Key Exchange                     │
-│                  License Validation                  │
-│                  Encrypted Bytecode Response         │
+│   (key + HWID)   ① HWID Integrity Check              │
+│                  ② Key Format Validation             │
+│                  ③ Session Token Generation          │
+│                  ④ Multi-layer Key Exchange          │
+│                  ⑤ Server-side Payload Assembly      │
+│                  ⑥ Bytecode Encryption + Signing     │
 │       │               │                              │
 │       ▼               ▼                              │
-│   FiOne VM  ◄── XOR decrypt + hex decode             │
+│   Client-side     Multi-pass decryption              │
+│   Integrity       Signature verification             │
+│   Verification    Payload unwrapping                 │
 │       │                                              │
-│   Main Script executes inside custom Lua VM          │
+│       ▼                                              │
+│   Sandboxed Lua VM — bytecode execution              │
+│   Main Script runs in isolated environment           │
 └──────────────────────────────────────────────────────┘
 ```
 
@@ -120,13 +127,27 @@ The project consists of two main parts:
 
 ### 🎭 Emotes & Animations
 
+> This is one of Pulsar's most distinctive modules — giving full control over character expression and movement style in any Roblox game.
+
+#### Radial Emote Menu
+
 | Feature | Description |
 |---------|-------------|
-| **Emote Wheel** | Searchable in-game radial emote menu |
-| **Favorites** | Save and quick-access preferred emotes |
-| **Animation Packs** | Per-slot override: Idle, Walk, Run, Jump, Fall, Climb, Swim |
-| **Cloud Sync** | Animation config saved server-side, synced on load |
-| **Keep Radial Menu** | Persist emote wheel after script close |
+| **Radial Emote Wheel** | Fully interactive in-game radial menu with instant emote search |
+| **Up to 24 Favorites** | Save up to 24 emotes in your personal favorites list for quick access |
+| **Use Any Emote Anywhere** | Play any emote in any Roblox game — even ones not natively supported in that game |
+| **No Restrictions** | Bypass per-game emote locks; use catalog emotes freely across all servers |
+| **Keep Radial Menu** | Radial wheel persists independently even after the main script is closed |
+
+#### Animation Packs
+
+| Feature | Description |
+|---------|-------------|
+| **Unlock Any Animation Pack** | Use any paid Roblox animation bundle — including premium and limited packs worth thousands of Robux |
+| **Per-Slot Override** | Assign any pack independently per movement slot: Idle, Walk, Run, Jump, Fall, Climb, Swim |
+| **Cross-Pack Mixing** | Combine movements from completely different packs — e.g. walk animation from one bundle, run from another |
+| **Live Roblox Catalog Browser** | Browse the full Roblox animation catalog directly from the web dashboard |
+| **Cloud Config Sync** | Your custom animation setup is saved server-side and automatically restored on every session |
 
 ---
 
@@ -171,23 +192,32 @@ Paste the loader into your executor's script box and execute it. A draggable win
 
 Enter your license key in the format `PULSAR-XXXX-XXXX-XXXX`. The loader validates the format client-side first.
 
-### 3. Authentication
+### 3. Authentication & Payload Delivery
 
 ```
-Client                             Server
-  │                                   │
-  │──── HWID + Key + DH Public ──────►│
-  │                                   │ validate key, check HWID, check sessions
-  │◄─── DH Public + Encrypted Bytecode│
-  │                                   │
-  │ XOR decrypt with shared secret    │
-  │ Feed bytecode into FiOne VM       │
-  │ Execute main script               │
+Client                                  Server
+  │                                        │
+  │──── Encrypted handshake request ──────►│
+  │        (HWID token + key digest)        │
+  │                                        │ ① HWID integrity check
+  │                                        │ ② License status & expiry check
+  │                                        │ ③ Session collision detection
+  │                                        │ ④ One-time session token issued
+  │                                        │ ⑤ Bytecode compiled & encrypted
+  │                                        │ ⑥ Payload signed with session key
+  │◄─── Signed encrypted payload ─────────│
+  │                                        │
+  │ ① Signature verification               │
+  │ ② Multi-pass payload decryption        │
+  │ ③ Integrity checksum validation        │
+  │ ④ Environment anti-hook checks         │
+  │ ⑤ Bytecode loaded into sandboxed VM   │
+  │ ⑥ Main script executes                │
 ```
 
 ### 4. Execution
 
-The main script runs inside **FiOne**, a custom Lua 5.1 VM implemented in Luau. This provides an additional layer of protection against static decompilation.
+The main script is executed inside a **custom sandboxed Lua VM** — the bytecode is never exposed as readable source. The VM layer makes static analysis and decompilation significantly harder, and the runtime environment is actively checked for tampering before execution begins.
 
 ---
 
@@ -224,7 +254,7 @@ Settings are automatically synced to the cloud when you exit a game session. You
 | 📅 **30-Day Access** | **$5.99** | 30 days |
 | ♾️ **Lifetime Access** | **$19.99** | Forever |
 
-Purchase is handled through the Telegram bot. Contact **[@slavyano4kaa](https://t.me/slavyano4kaa)** to get a key.
+For purchasing details, visit **[slavya.space](https://slavya.space)**.
 
 ---
 
